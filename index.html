@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>藝術媒材配對測驗</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -144,9 +144,10 @@
   }
   .media-item.is-current { border-color: var(--moss); background: color-mix(in srgb, var(--moss) 10%, var(--surface)); font-weight: 500; }
 </style>
-
 </head>
 <body>
+
+
 <div class="wrap">
   <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 
@@ -156,7 +157,7 @@
     <div class="intro-card">
       <p><strong>這個測驗在做什麼？</strong></p>
       <p>水彩、黏土、拼貼、水墨⋯⋯每一種媒材的「個性」都不一樣——有的流動、有的穩定，有的靠身體、有的靠手腕。藝術治療裡有個說法：你跟媒材之間的化學反應，往往跟你是什麼樣的人有關。</p>
-      <p>這些題目大多跟「畫畫」沒什麼關係，是關於你怎麼過日子、怎麼安放情緒。回答完，我們會從 15 種媒材裡，找出最像你的那一個。</p>
+      <p>這些題目大多跟「畫畫」沒什麼關係，是關於你怎麼過日子、怎麼安放情緒。回答完，我們會從 14 種媒材裡，找出最像你的那一個。</p>
     </div>
     <button class="btn" id="startBtn">開始測驗</button>
   </section>
@@ -176,6 +177,7 @@
   <section class="screen q-screen" id="q12"></section>
   <section class="screen q-screen" id="q13"></section>
   <section class="screen q-screen" id="q14"></section>
+  <section class="screen q-screen" id="q15"></section>
 
   <section class="screen" id="result">
     <p class="result-tag">你最適合的媒材</p>
@@ -186,7 +188,7 @@
     <div class="axes" id="axesBlock">
       <div class="axis-row"><span class="axis-label">流動性</span><div class="axis-track"><div class="axis-fill" id="fillF" style="width:0%"></div></div></div>
       <div class="axis-row"><span class="axis-label">身體參與</span><div class="axis-track"><div class="axis-fill" id="fillK" style="width:0%"></div></div></div>
-      <div class="axis-row"><span class="axis-label">自由程度</span><div class="axis-track"><div class="axis-fill" id="fillS" style="width:0%"></div></div></div>
+      <div class="axis-row"><span class="axis-label">可逆程度</span><div class="axis-track"><div class="axis-fill" id="fillS" style="width:0%"></div></div></div>
       <div class="axis-row"><span class="axis-label">模糊程度</span><div class="axis-track"><div class="axis-fill" id="fillB" style="width:0%"></div></div></div>
     </div>
 
@@ -218,7 +220,7 @@
     <p class="copy-note" id="copyNote" aria-live="polite"></p>
 
     <div class="other-results">
-      <h3>十五種媒材一覽</h3>
+      <h3>十四種媒材一覽</h3>
       <div class="media-grid" id="mediaGrid"></div>
     </div>
   </section>
@@ -226,23 +228,23 @@
 
 <script>
 (function () {
-  // 媒材座標：F 流動性 0-10（抗阻→流動）, K 身體參與 0-10（精細→全身）, S 自由程度 0-10（結構→即興）
+  // 媒材座標：F 流動性 0-10（抗阻→流動）, K 身體參與 0-10（精細→全身）, S 可逆性 0-10（永久不能改→很容易修改）, B 模糊程度 0-10（清晰→模糊）
+  // H 為隱藏向度（環境傾向：熟悉封閉→開放未知），不在結果頁顯示，只用於配對計分
   var media = [
-    { name: "水彩", f: 8, k: 3, s: 7, b: 8, desc: "顏色會自己暈開、流動、混合，很難完全掌控。你適合讓情緒先流出來，再慢慢看懂它——不確定的邊界，常常才是最真實的部分。" },
-    { name: "蠟筆", f: 3, k: 4, s: 6, b: 4, desc: "顏色飽和、質地溫潤，可以疊色也可以塗抹。你適合帶著一點童年的自在感去創作，不用太用力，顏色自己會說話。" },
-    { name: "彩色筆", f: 1, k: 2, s: 7, b: 1, desc: "線條清楚、顏色乾淨，而且顏色選擇很多。你的內心豐沛、想法很多，很難只用一種顏色說完自己，喜歡保有各種表達的可能性。" },
-    { name: "粉彩", f: 7, k: 5, s: 6, b: 9, desc: "濛濛融融、界線曖昧，用指腹就能推、揉、暈開，修改的空間很大。你適合把意外的痕跡揉進作品裡，讓界線自然模糊。" },
-    { name: "壓克力顏料", f: 5, k: 5, s: 6, b: 2, desc: "覆蓋性極高、顏色飽和濃烈，蓋得住，就不怕犯錯。你適合大膽直接地下筆，不猶豫——但要知道，乾了之後就是永遠的決定。" },
-    { name: "廣告顏料", f: 6, k: 3, s: 7, b: 3, desc: "顏色鮮豔、好上手，乾了也能再加水喚醒、重新調整。你適合輕鬆直接地表達，重來一次也毫無負擔。" },
-    { name: "簽字筆", f: 1, k: 2, s: 1, b: 0, desc: "只有黑白，一筆下去就是定局，不能暈染也不能回頭。你喜歡純粹、本質的事物，容易被外界牽動，所以更珍惜能安靜待著的內在小世界——不需要很多顏色，想清楚的那一句話就夠了。" },
-    { name: "炭筆", f: 4, k: 6, s: 7, b: 9, desc: "一樣只有黑白，但粉末很容易暈染、容易弄髒手，是會流動的黑白。你適合帶一點隨性、讓手指直接去感覺該怎麼推、怎麼畫。" },
-    { name: "鉛筆", f: 0, k: 1, s: 3, b: 7, desc: "可以擦掉重來，也很好暈染推抹，常用來做漸層。你適合在安全感充足的狀態下，慢慢把想法梳理清楚，再讓它們自然模糊成一片。" },
-    { name: "拼貼", f: 2, k: 3, s: 3, b: 1, desc: "不用從零開始畫，用「選擇」和「組合」代替生成。你不一定擅長畫畫，但你的眼光本身就是一種創作力——你更擅長從已經存在的東西裡，看出別人看不到的關聯。" },
-    { name: "編織", f: 1, k: 7, s: 2, b: 5, desc: "雙手來回穿梭，身體跟著節奏晃動，毛線蓬鬆帶著絨感。你適合用韻律感安定自己，重複的動作本身，就是一種療癒。" },
-    { name: "縫紉", f: 1, k: 4, s: 0, b: 6, desc: "一針一線，慢慢完成，急不得，布料與線的質地柔軟不銳利。你需要的不是身體的律動，而是耐心、細心、靜下心來的忍耐力——過程本身就是一種修練。" },
-    { name: "水墨", f: 9, k: 5, s: 9, b: 10, desc: "墨一落紙就無法收回，每一筆都是當下的決定。你適合練習活在當下、接受不完美，不執著於回頭修改。" },
-    { name: "輕黏土", f: 6, k: 7, s: 7, b: 4, desc: "可以捏、可以塑形，柔軟又好掌握，怎麼改都不心疼，但捏出來的邊界其實是分明的。你適合用手直接感受材料，讓身體參與到情緒的整理裡。" },
-    { name: "陶土", f: 7, k: 10, s: 6, b: 6, desc: "拍打、揉捏、用全身的力氣去感受材料，表面常常留下有機的指痕，沒有銳利的邊界。你最適合用身體說話——不需要畫得像，手知道怎麼做。" }
+    { name: "水彩", f: 9, k: 1, s: 6, b: 8, h: 7, desc: "顏色會自己暈開、流動、混合，很難完全掌控。你適合讓情緒先流出來，再慢慢看懂它——不確定的邊界，常常才是最真實的部分。" },
+    { name: "蠟筆", f: 4, k: 4, s: 2, b: 4, h: 10, desc: "顏色飽和、質地溫潤，畫下去很難完全去除，只能疊加。你適合帶著一點童年的自在感去創作，知道有些痕跡留下了就是留下了。" },
+    { name: "彩色筆", f: 3, k: 0, s: 1, b: 1, h: 10, desc: "線條清楚、顏色乾淨，而且顏色選擇很多，畫了幾乎回不去。你的內心豐沛、想法很多，很難只用一種顏色說完自己，喜歡保有各種表達的可能性。" },
+    { name: "粉彩", f: 5, k: 5, s: 9, b: 9, h: 7, desc: "濛濛融融、界線曖昧，用指腹就能推、揉、暈開，修改的空間很大。你適合把意外的痕跡揉進作品裡，讓界線自然模糊。" },
+    { name: "壓克力顏料", f: 7, k: 3, s: 4, b: 2, h: 10, desc: "覆蓋性極高、顏色飽和濃烈，蓋得住，就不怕犯錯。你適合大膽直接地下筆，不猶豫——但要知道，乾了之後就是永遠的決定。" },
+    { name: "簽字筆", f: 1, k: 0, s: 0, b: 0, h: 0, desc: "只有黑白，一筆下去就是定局，不能暈染也不能回頭。你喜歡純粹、本質的事物，容易被外界牽動，所以更珍惜能安靜待著的內在小世界——不需要很多顏色，想清楚的那一句話就夠了。" },
+    { name: "炭筆", f: 4, k: 7, s: 10, b: 9, h: 0, desc: "一樣只有黑白，但粉末很容易暈染、容易弄髒手，也很好用軟橡皮擦掉調整。你適合帶一點隨性、讓手指直接去感覺該怎麼推、怎麼畫，知道隨時都能重來。" },
+    { name: "色鉛筆", f: 2, k: 3, s: 8, b: 7, h: 7, desc: "可以擦掉重來，也很好暈染推抹，常用來做漸層。你適合在安全感充足的狀態下，慢慢把想法梳理清楚，再讓它們自然模糊成一片。" },
+    { name: "拼貼", f: 2, k: 7, s: 4, b: 1, h: 9, desc: "不用從零開始畫，用「選擇」和「組合」代替生成，黏上去之前都還能調整。你不一定擅長畫畫，但你的眼光本身就是一種創作力——你更擅長從已經存在的東西裡，看出別人看不到的關聯。" },
+    { name: "編織", f: 1, k: 9, s: 3, b: 5, h: 3, desc: "雙手來回穿梭，身體跟著節奏晃動，毛線蓬鬆帶著絨感，拆了可以重織，但很費工。你適合用韻律感安定自己，重複的動作本身，就是一種療癒。" },
+    { name: "刺繡", f: 0, k: 5, s: 1, b: 6, h: 3, desc: "一針一線，慢慢完成，急不得，布料與線的質地柔軟不銳利，拆線重繡也很費工。你需要的不是身體的律動，而是耐心、細心、靜下心來的忍耐力——過程本身就是一種修練。" },
+    { name: "水墨", f: 10, k: 2, s: 7, b: 10, h: 3, desc: "墨碰到紙的瞬間會暈開，但你還可以持續加水、加墨，讓畫面不斷流動、調整，沒有真正「定稿」的那一刻。你適合保留事情還能回應、修正的空間，不急著把一切定案。" },
+    { name: "輕黏土", f: 6, k: 6, s: 5, b: 4, h: 10, desc: "可以捏、可以塑形，柔軟又好掌握，沒乾之前怎麼改都不心疼，但捏出來的邊界其實是分明的。你適合用手直接感受材料，讓身體參與到情緒的整理裡。" },
+    { name: "陶土", f: 3, k: 10, s: 6, b: 6, h: 0, desc: "拍打、揉捏、用全身的力氣去感受材料，表面常常留下有機的指痕，沒有銳利的邊界。你最適合用身體說話——不需要畫得像，手知道怎麼做。" }
   ];
 
   var questions = [
@@ -260,8 +262,8 @@
       options: [
         { label: "很多種聲音同時在說話，很難選一個答案", d: { f: 3 } },
         { label: "其實只有一個核心的念頭，其他都是雜訊", d: { f: -3 } },
-        { label: "想法很多，但最後都會收斂成一個方向", d: { f: 1, s: -1 } },
-        { label: "看情況，有時候複雜有時候單純", d: { s: 1 } }
+        { label: "想法很多，但最後都會收斂成一個方向", d: { f: 1 } },
+        { label: "看情況，有時候複雜有時候單純", d: {} }
       ]
     },
     {
@@ -270,7 +272,7 @@
         { label: "說一段經歷或故事來描述自己", d: { f: 2 } },
         { label: "挑幾個具代表性的關鍵背景來說明", d: { f: -2 } },
         { label: "用一句話總結就好", d: { k: -2 } },
-        { label: "讓對方自己慢慢認識，不特別說明", d: { s: 2 } }
+        { label: "讓對方自己慢慢認識，不特別說明", d: {} }
       ]
     },
     {
@@ -278,7 +280,7 @@
       options: [
         { label: "用力刷洗、搬動家具，整個人動起來", d: { k: 3 } },
         { label: "細心整理小東西、歸位，動作精巧", d: { k: -3 } },
-        { label: "兩種都做，看心情", d: { s: 1 } },
+        { label: "兩種都做，看心情", d: {} },
         { label: "能不做就不做", d: { k: -1 } }
       ]
     },
@@ -292,19 +294,19 @@
       ]
     },
     {
-      text: "你喜歡的餐廳要等，在等待的過程中你覺得？",
+      text: "如果你不小心把牆壁弄髒了一小塊，你會？",
       options: [
-        { label: "滿享受的，等待也是一種期待的過程", d: { s: -2 } },
-        { label: "有點不耐煩，比較希望馬上吃到", d: { s: 2 } },
-        { label: "會站起來走走、活動一下身體", d: { k: 2 } },
-        { label: "安靜坐著，滑手機或發呆", d: { k: -2 } }
+        { label: "想辦法擦掉或補漆，把它恢復原狀", d: { s: 2 } },
+        { label: "就留著了，之後也不會特別處理", d: { s: -2 } },
+        { label: "其實有點期待，剛好可以重新粉刷、換個顏色", d: { s: 3 } },
+        { label: "有些痕跡留下就留下了，那就是這個家的樣子", d: { s: -3 } }
       ]
     },
     {
       text: "你準備要學習一件新事物，你會？",
       options: [
         { label: "先去試試看，錯了再慢慢調整，不會一開始就要求完美", d: { s: 2 } },
-        { label: "排出完整的學習計畫，一步一步扎實地來", d: { s: -2 } },
+        { label: "排出完整的學習計畫，一步一步扎實地來", d: {} },
         { label: "最快的方法是直接動手做一次，身體自然會記住", d: { k: 2 } },
         { label: "先在腦海裡模擬過幾次，確定清楚了才正式開始", d: { k: -2 } }
       ]
@@ -323,17 +325,17 @@
       options: [
         { label: "到處走走、爬山、運動，讓身體好好動一動", d: { k: 3 } },
         { label: "窩在家裡，安靜地看書或做細活", d: { k: -3 } },
-        { label: "做一些重複的日常事務，像整理、打掃", d: { k: 1, s: -3 } },
-        { label: "耍廢放空，想到什麼算什麼", d: { s: 2 } }
+        { label: "做一些重複的日常事務，像整理、打掃", d: { k: 1 } },
+        { label: "耍廢放空，想到什麼算什麼", d: {} }
       ]
     },
     {
       text: "生活中不小心把事情搞砸了，你的反應是？",
       options: [
         { label: "沒關係，順勢調整就好，計畫趕不上變化很正常", d: { f: 2 } },
-        { label: "會想辦法補救、修正到滿意為止", d: { f: -2, s: -1 } },
-        { label: "那就這樣吧，過去的事不會回頭，往前看", d: { s: 3 } },
-        { label: "先動手做點什麼來補救，做了再說", d: { k: 2 } }
+        { label: "會想辦法補救、修正到滿意為止", d: { f: -2, s: 2 } },
+        { label: "那就這樣吧，過去的事不會回頭，往前看", d: { s: -3 } },
+        { label: "先動手做點什麼來補救，做了再說", d: { k: 2, s: 1 } }
       ]
     },
     {
@@ -341,8 +343,8 @@
       options: [
         { label: "顏色自然流動、暈染開來的樣子", d: { f: 3 } },
         { label: "每個細節都精準、乾淨俐落", d: { f: -3 } },
-        { label: "當下發生的就是完整的，不需要修改", d: { s: 3 } },
-        { label: "反覆調整、重新排列，直到剛剛好", d: { s: -2 } }
+        { label: "當下發生的就是完整的，不需要修改", d: { s: -3 } },
+        { label: "反覆調整、重新排列，直到剛剛好", d: { s: 2 } }
       ]
     },
     {
@@ -350,8 +352,8 @@
       options: [
         { label: "把顏料弄得到處都是，盡情揮灑", d: { f: 3 } },
         { label: "安靜地、精細地完成一幅畫", d: { f: -3 } },
-        { label: "順其自然，什麼也不做也沒關係", d: { s: 3 } },
-        { label: "做一些重複、療癒的手作，像編織或縫紉", d: { s: -3, k: 1 } }
+        { label: "順其自然，什麼也不做也沒關係", d: {} },
+        { label: "做一些重複、療癒的手作，像編織或刺繡", d: { k: 1 } }
       ]
     },
     {
@@ -379,6 +381,15 @@
         { label: "邊緣分明、觸感乾淨俐落的東西，像光滑的石頭或金屬", d: { b: -3 } },
         { label: "有點粗糙、帶著自然紋理的東西，像木頭或麻布", d: { b: 1 } },
         { label: "冰涼平整、線條工整的東西，像玻璃或瓷器", d: { b: -2 } }
+      ]
+    },
+    {
+      text: "哪種環境讓你可以安心創作？",
+      options: [
+        { label: "熟悉的房間，什麼都在它該在的位置", d: { h: -3 } },
+        { label: "人少的咖啡店，安靜但還是有一點生活感", d: { h: -1 } },
+        { label: "公園庭院的角落，被植物圍繞，但看得到天空", d: { h: 1 } },
+        { label: "充滿未知的原野，什麼都有可能發生", d: { h: 3 } }
       ]
     }
   ];
@@ -443,8 +454,8 @@
   // 依題目實際可能達到的分數範圍自動校正（而非假設對稱區間），
   // 確保每個向度都能真正跑滿 0-10，媒材配對更準確。
   var AXIS_RANGE = (function () {
-    var range = { f: { min: 0, max: 0 }, k: { min: 0, max: 0 }, s: { min: 0, max: 0 }, b: { min: 0, max: 0 } };
-    ['f', 'k', 's', 'b'].forEach(function (axis) {
+    var range = { f: { min: 0, max: 0 }, k: { min: 0, max: 0 }, s: { min: 0, max: 0 }, b: { min: 0, max: 0 }, h: { min: 0, max: 0 } };
+    ['f', 'k', 's', 'b', 'h'].forEach(function (axis) {
       var minSum = 0, maxSum = 0;
       questions.forEach(function (q) {
         var vals = q.options.map(function (opt) { return (opt.d && opt.d[axis]) || 0; });
@@ -457,7 +468,7 @@
   })();
 
   function computeScores() {
-    var raw = { f: 0, k: 0, s: 0, b: 0 };
+    var raw = { f: 0, k: 0, s: 0, b: 0, h: 0 };
     answers.forEach(function (a, i) {
       if (a === null) return;
       var d = questions[i].options[a].d || {};
@@ -465,6 +476,7 @@
       raw.k += d.k || 0;
       raw.s += d.s || 0;
       raw.b += d.b || 0;
+      raw.h += d.h || 0;
     });
     function norm(v, axis) {
       var r = AXIS_RANGE[axis];
@@ -472,7 +484,7 @@
       var scaled = span === 0 ? 5 : (v - r.min) / span * 10;
       return Math.max(0, Math.min(10, scaled));
     }
-    return { f: norm(raw.f, 'f'), k: norm(raw.k, 'k'), s: norm(raw.s, 's'), b: norm(raw.b, 'b') };
+    return { f: norm(raw.f, 'f'), k: norm(raw.k, 'k'), s: norm(raw.s, 's'), b: norm(raw.b, 'b'), h: norm(raw.h, 'h') };
   }
 
   function nearestMedia(score) {
@@ -481,7 +493,8 @@
         Math.pow(m.f - score.f, 2) +
         Math.pow(m.k - score.k, 2) +
         Math.pow(m.s - score.s, 2) +
-        Math.pow(m.b - score.b, 2)
+        Math.pow(m.b - score.b, 2) +
+        Math.pow(m.h - score.h, 2)
       );
       return { m: m, dist: dist };
     }).sort(function (a, b) { return a.dist - b.dist; });
@@ -498,7 +511,7 @@
     var third = ranked[2].m;
 
     document.getElementById('resultTitle').textContent = best.name;
-    document.getElementById('resultSub').textContent = "在 15 種媒材中，最接近你的是這一個";
+    document.getElementById('resultSub').textContent = "在 14 種媒材中，最接近你的是這一個";
     document.getElementById('resultBody').innerHTML = '<p>' + best.desc + '</p>';
 
     document.getElementById('fillF').style.width = Math.round(score.f / 10 * 100) + '%';
