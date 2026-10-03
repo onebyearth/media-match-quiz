@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>藝術媒材配對測驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --ground: #edf1ec;
+    --surface: #f8faf6;
+    --ink: #1e2b27;
+    --ink-soft: #4a5b54;
+    --line: #c9d4c9;
+    --moss: #46664f;
+    --water: #2a7778;
+    --on-water: #ffffff;
+    --slip: #fbf6e6;
+    --slip-ink: #2d302a;
+    --slip-line: #e3d9b8;
+    --warn: #a15c2c;
+    --shadow: 0 1px 2px rgba(30, 43, 39, 0.10), 0 10px 24px -12px rgba(30, 43, 39, 0.28);
+    --display: "LXGW WenKai TC", "Kaiti TC", "DFKai-SB", "KaiTi", serif;
+    --body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #131b18; --surface: #1a2420; --ink: #e5eee8; --ink-soft: #a6b8ae;
+      --line: #2e3c36; --moss: #8fb798; --water: #6fc2c0; --on-water: #0e1a18;
+      --slip: #262a23; --slip-ink: #ece6d0; --slip-line: #3d3f35; --warn: #d99a6c;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 10px 24px -12px rgba(0,0,0,0.6);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #131b18; --surface: #1a2420; --ink: #e5eee8; --ink-soft: #a6b8ae;
+    --line: #2e3c36; --moss: #8fb798; --water: #6fc2c0; --on-water: #0e1a18;
+    --slip: #262a23; --slip-ink: #ece6d0; --slip-line: #3d3f35; --warn: #d99a6c;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 10px 24px -12px rgba(0,0,0,0.6);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink); font-family: var(--body);
+    line-height: 1.75; -webkit-font-smoothing: antialiased; min-height: 100vh;
+  }
+  .wrap {
+    max-width: 480px; margin-inline: auto; padding: 28px 20px 48px; min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.4; }
+  p { margin: 0; }
+  :focus-visible { outline: 3px solid var(--water); outline-offset: 2px; border-radius: 6px; }
+
+  .progress-track { height: 4px; background: var(--line); border-radius: 999px; overflow: hidden; margin-bottom: 28px; flex-shrink: 0; }
+  .progress-fill { height: 100%; background: var(--moss); border-radius: 999px; transition: width .35s ease; }
+
+  .screen { display: none; flex-direction: column; flex: 1; animation: rise .4s ease both; }
+  .screen.active { display: flex; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .screen { animation: none; } }
+
+  #intro { justify-content: center; text-align: center; gap: 22px; }
+  .eyebrow { font-size: .78rem; letter-spacing: .2em; color: var(--moss); font-weight: 500; }
+  #intro h1 { font-size: clamp(1.8rem, 7.5vw, 2.4rem); }
+  .intro-desc { color: var(--ink-soft); font-size: .98rem; max-width: 34em; margin-inline: auto; }
+  .intro-card {
+    background: var(--slip); color: var(--slip-ink); border: 1px solid var(--slip-line);
+    border-radius: 4px; padding: 20px; box-shadow: var(--shadow); text-align: left;
+    font-size: .92rem; transform: rotate(-.6deg);
+  }
+  .intro-card p + p { margin-top: 8px; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 50px; padding: 12px 28px; border-radius: 999px;
+    font: 500 1rem/1 var(--body); text-decoration: none; cursor: pointer;
+    border: 1.5px solid transparent; background: var(--water); color: var(--on-water);
+    transition: transform .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+
+  .q-screen { gap: 20px; }
+  .q-count { font-size: .8rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+  .q-text { font-size: 1.25rem; font-family: var(--display); font-weight: 700; margin-top: 6px; }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .opt {
+    text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; font: 500 .95rem/1.5 var(--body); color: var(--ink); cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .opt:hover { border-color: var(--moss); }
+  .opt[aria-pressed="true"] { border-color: var(--moss); background: color-mix(in srgb, var(--moss) 12%, var(--surface)); }
+  .q-nav { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 18px; }
+  .q-back { font-size: .88rem; color: var(--ink-soft); background: none; border: none; cursor: pointer; padding: 8px; }
+
+  #result { gap: 20px; }
+  .result-tag { font-size: .78rem; letter-spacing: .18em; color: var(--moss); font-weight: 500; }
+  .result-title { font-size: clamp(1.7rem, 7vw, 2.2rem); margin-top: 6px; }
+  .result-sub { font-size: .92rem; color: var(--ink-soft); margin-top: 2px; }
+  .result-body { color: var(--ink-soft); font-size: .98rem; margin-top: 4px; }
+  .result-body p + p { margin-top: 10px; }
+  .axes { display: grid; gap: 10px; margin-top: 4px; }
+  .axis-row { display: grid; grid-template-columns: 84px 1fr; align-items: center; gap: 10px; }
+  .axis-label { font-size: .78rem; color: var(--ink-soft); }
+  .axis-track { height: 8px; border-radius: 999px; background: var(--line); position: relative; overflow: hidden; }
+  .axis-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--moss), var(--water)); }
+
+  .second-pick {
+    background: var(--slip); color: var(--slip-ink); border: 1px solid var(--slip-line);
+    border-radius: 4px; padding: 18px 20px; box-shadow: var(--shadow); margin-top: 4px;
+  }
+  .second-pick .tag { font-size: .72rem; letter-spacing: .14em; font-weight: 500; opacity: .75; }
+  .second-pick h3 { font-size: 1.05rem; margin-top: 6px; }
+  .second-pick p { font-size: .9rem; margin-top: 6px; opacity: .9; }
+
+  .invite {
+    margin-top: 14px; text-align: center;
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 0 0 26px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .invite img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; }
+  .invite .invite-body { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 22px 24px 0; }
+  .invite .eyebrow { margin: 0; }
+  .invite h3 { font-size: 1.3rem; }
+  .invite p { font-size: .95rem; color: var(--ink-soft); max-width: 32em; }
+  .result-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .result-actions .btn { flex: 1; }
+  .copy-note { font-size: .8rem; color: var(--ink-soft); min-height: 1.2em; }
+
+  .other-results { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 20px; }
+  .other-results h3 { font-size: .96rem; color: var(--ink-soft); font-weight: 500; font-family: var(--body); }
+  .media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  @media (max-width: 420px) { .media-grid { grid-template-columns: 1fr; } }
+  .media-item {
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--surface);
+    font-size: .85rem;
+  }
+  .media-item.is-current { border-color: var(--moss); background: color-mix(in srgb, var(--moss) 10%, var(--surface)); font-weight: 500; }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+  <section class="screen active" id="intro">
+    <p class="eyebrow">一個小小的自我測驗</p>
+    <h1>測測你適合的藝術媒材</h1>
+    <div class="intro-card">
+      <p><strong>這個測驗在做什麼？</strong></p>
+      <p>水彩、黏土、拼貼、水墨⋯⋯每一種媒材的「個性」都不一樣——有的流動、有的穩定，有的靠身體、有的靠手腕。藝術治療裡有個說法：你跟媒材之間的化學反應，往往跟你是什麼樣的人有關。</p>
+      <p>這些題目大多跟「畫畫」沒什麼關係，是關於你怎麼過日子、怎麼安放情緒。回答完，我們會從 15 種媒材裡，找出最像你的那一個。</p>
+    </div>
+    <button class="btn" id="startBtn">開始測驗</button>
+  </section>
+
+  <section class="screen q-screen" id="q0"></section>
+  <section class="screen q-screen" id="q1"></section>
+  <section class="screen q-screen" id="q2"></section>
+  <section class="screen q-screen" id="q3"></section>
+  <section class="screen q-screen" id="q4"></section>
+  <section class="screen q-screen" id="q5"></section>
+  <section class="screen q-screen" id="q6"></section>
+  <section class="screen q-screen" id="q7"></section>
+  <section class="screen q-screen" id="q8"></section>
+  <section class="screen q-screen" id="q9"></section>
+  <section class="screen q-screen" id="q10"></section>
+  <section class="screen q-screen" id="q11"></section>
+  <section class="screen q-screen" id="q12"></section>
+  <section class="screen q-screen" id="q13"></section>
+  <section class="screen q-screen" id="q14"></section>
+
+  <section class="screen" id="result">
+    <p class="result-tag">你最適合的媒材</p>
+    <h2 class="result-title" id="resultTitle"></h2>
+    <p class="result-sub" id="resultSub"></p>
+    <div class="result-body" id="resultBody"></div>
+
+    <div class="axes" id="axesBlock">
+      <div class="axis-row"><span class="axis-label">流動性</span><div class="axis-track"><div class="axis-fill" id="fillF" style="width:0%"></div></div></div>
+      <div class="axis-row"><span class="axis-label">身體參與</span><div class="axis-track"><div class="axis-fill" id="fillK" style="width:0%"></div></div></div>
+      <div class="axis-row"><span class="axis-label">自由程度</span><div class="axis-track"><div class="axis-fill" id="fillS" style="width:0%"></div></div></div>
+      <div class="axis-row"><span class="axis-label">模糊程度</span><div class="axis-track"><div class="axis-fill" id="fillB" style="width:0%"></div></div></div>
+    </div>
+
+    <div class="second-pick" id="secondPick">
+      <p class="tag">也很適合你</p>
+      <h3 id="secondTitle"></h3>
+      <p id="secondBody"></p>
+    </div>
+
+    <div class="second-pick" id="thirdPick">
+      <p class="tag">也很適合你</p>
+      <h3 id="thirdTitle"></h3>
+      <p id="thirdBody"></p>
+    </div>
+
+    <div class="invite">
+      <img src="images/painting.jpg" alt="戶外調色盤上擠出的顏料，四周散落著秋天的落葉，一旁放著畫筆">
+      <div class="invite-body">
+        <p class="eyebrow">北投 ・ 行動畫室</p>
+        <h3>森林開放畫室</h3>
+        <p>在北投的公園與森林裡，開了一間行動畫室，畫室裡有畫紙、畫布、各種媒材與一封大自然的邀請函。我們走進森林，不是來把畫畫好，而是坐下來，讓自然與藝術陪你一起呼吸。</p>
+        <a class="btn" href="https://claude.ai/artifact/S4WWC5x3jooYDrSdRW12y9" target="_blank" rel="noopener">了解森林開放畫室</a>
+      </div>
+    </div>
+    <div class="result-actions">
+      <button class="btn btn-ghost" id="copyBtn">複製我的結果</button>
+      <button class="btn btn-ghost" id="restartBtn">重新測一次</button>
+    </div>
+    <p class="copy-note" id="copyNote" aria-live="polite"></p>
+
+    <div class="other-results">
+      <h3>十五種媒材一覽</h3>
+      <div class="media-grid" id="mediaGrid"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  // 媒材座標：F 流動性 0-10（抗阻→流動）, K 身體參與 0-10（精細→全身）, S 自由程度 0-10（結構→即興）
+  var media = [
+    { name: "水彩", f: 8, k: 3, s: 7, b: 8, desc: "顏色會自己暈開、流動、混合，很難完全掌控。你適合讓情緒先流出來，再慢慢看懂它——不確定的邊界，常常才是最真實的部分。" },
+    { name: "蠟筆", f: 3, k: 4, s: 6, b: 4, desc: "顏色飽和、質地溫潤，可以疊色也可以塗抹。你適合帶著一點童年的自在感去創作，不用太用力，顏色自己會說話。" },
+    { name: "彩色筆", f: 1, k: 2, s: 7, b: 1, desc: "線條清楚、顏色乾淨，而且顏色選擇很多。你的內心豐沛、想法很多，很難只用一種顏色說完自己，喜歡保有各種表達的可能性。" },
+    { name: "粉彩", f: 7, k: 5, s: 6, b: 9, desc: "濛濛融融、界線曖昧，用指腹就能推、揉、暈開，修改的空間很大。你適合把意外的痕跡揉進作品裡，讓界線自然模糊。" },
+    { name: "壓克力顏料", f: 5, k: 5, s: 6, b: 2, desc: "覆蓋性極高、顏色飽和濃烈，蓋得住，就不怕犯錯。你適合大膽直接地下筆，不猶豫——但要知道，乾了之後就是永遠的決定。" },
+    { name: "廣告顏料", f: 6, k: 3, s: 7, b: 3, desc: "顏色鮮豔、好上手，乾了也能再加水喚醒、重新調整。你適合輕鬆直接地表達，重來一次也毫無負擔。" },
+    { name: "簽字筆", f: 1, k: 2, s: 1, b: 0, desc: "只有黑白，一筆下去就是定局，不能暈染也不能回頭。你喜歡純粹、本質的事物，容易被外界牽動，所以更珍惜能安靜待著的內在小世界——不需要很多顏色，想清楚的那一句話就夠了。" },
+    { name: "炭筆", f: 4, k: 6, s: 7, b: 9, desc: "一樣只有黑白，但粉末很容易暈染、容易弄髒手，是會流動的黑白。你適合帶一點隨性、讓手指直接去感覺該怎麼推、怎麼畫。" },
+    { name: "鉛筆", f: 0, k: 1, s: 3, b: 7, desc: "可以擦掉重來，也很好暈染推抹，常用來做漸層。你適合在安全感充足的狀態下，慢慢把想法梳理清楚，再讓它們自然模糊成一片。" },
+    { name: "拼貼", f: 2, k: 3, s: 3, b: 1, desc: "不用從零開始畫，用「選擇」和「組合」代替生成。你不一定擅長畫畫，但你的眼光本身就是一種創作力——你更擅長從已經存在的東西裡，看出別人看不到的關聯。" },
+    { name: "編織", f: 1, k: 7, s: 2, b: 5, desc: "雙手來回穿梭，身體跟著節奏晃動，毛線蓬鬆帶著絨感。你適合用韻律感安定自己，重複的動作本身，就是一種療癒。" },
+    { name: "縫紉", f: 1, k: 4, s: 0, b: 6, desc: "一針一線，慢慢完成，急不得，布料與線的質地柔軟不銳利。你需要的不是身體的律動，而是耐心、細心、靜下心來的忍耐力——過程本身就是一種修練。" },
+    { name: "水墨", f: 9, k: 5, s: 9, b: 10, desc: "墨一落紙就無法收回，每一筆都是當下的決定。你適合練習活在當下、接受不完美，不執著於回頭修改。" },
+    { name: "輕黏土", f: 6, k: 7, s: 7, b: 4, desc: "可以捏、可以塑形，柔軟又好掌握，怎麼改都不心疼，但捏出來的邊界其實是分明的。你適合用手直接感受材料，讓身體參與到情緒的整理裡。" },
+    { name: "陶土", f: 7, k: 10, s: 6, b: 6, desc: "拍打、揉捏、用全身的力氣去感受材料，表面常常留下有機的指痕，沒有銳利的邊界。你最適合用身體說話——不需要畫得像，手知道怎麼做。" }
+  ];
+
+  var questions = [
+    {
+      text: "答應別人一件事情以後，你希望？",
+      options: [
+        { label: "就這樣定了，不會後悔也不回頭", d: { s: -2 } },
+        { label: "如果之後有新想法，還是可以調整", d: { s: 2 } },
+        { label: "可以先這樣，邊走邊修正細節", d: { s: 1, k: 1 } },
+        { label: "答應了，但心裡其實還在反覆琢磨", d: { f: -2 } }
+      ]
+    },
+    {
+      text: "形容自己腦中的想法，你比較像？",
+      options: [
+        { label: "很多種聲音同時在說話，很難選一個答案", d: { f: 3 } },
+        { label: "其實只有一個核心的念頭，其他都是雜訊", d: { f: -3 } },
+        { label: "想法很多，但最後都會收斂成一個方向", d: { f: 1, s: -1 } },
+        { label: "看情況，有時候複雜有時候單純", d: { s: 1 } }
+      ]
+    },
+    {
+      text: "想向別人介紹「你是什麼樣的人」，你會？",
+      options: [
+        { label: "說一段經歷或故事來描述自己", d: { f: 2 } },
+        { label: "挑幾個具代表性的關鍵背景來說明", d: { f: -2 } },
+        { label: "用一句話總結就好", d: { k: -2 } },
+        { label: "讓對方自己慢慢認識，不特別說明", d: { s: 2 } }
+      ]
+    },
+    {
+      text: "做家事的時候，你比較喜歡？",
+      options: [
+        { label: "用力刷洗、搬動家具，整個人動起來", d: { k: 3 } },
+        { label: "細心整理小東西、歸位，動作精巧", d: { k: -3 } },
+        { label: "兩種都做，看心情", d: { s: 1 } },
+        { label: "能不做就不做", d: { k: -1 } }
+      ]
+    },
+    {
+      text: "你覺得每一件事情都有正確答案嗎？",
+      options: [
+        { label: "完全沒有標準答案，模糊才是常態", d: { f: 3 } },
+        { label: "大部分都有正確答案，只是我們還沒找到", d: { f: -3 } },
+        { label: "只有少數事情有絕對答案，大部分都是見仁見智", d: { f: 1 } },
+        { label: "大部分事情都有相對更好的答案，只是沒那麼絕對", d: { f: -1 } }
+      ]
+    },
+    {
+      text: "你喜歡的餐廳要等，在等待的過程中你覺得？",
+      options: [
+        { label: "滿享受的，等待也是一種期待的過程", d: { s: -2 } },
+        { label: "有點不耐煩，比較希望馬上吃到", d: { s: 2 } },
+        { label: "會站起來走走、活動一下身體", d: { k: 2 } },
+        { label: "安靜坐著，滑手機或發呆", d: { k: -2 } }
+      ]
+    },
+    {
+      text: "你準備要學習一件新事物，你會？",
+      options: [
+        { label: "先去試試看，錯了再慢慢調整，不會一開始就要求完美", d: { s: 2 } },
+        { label: "排出完整的學習計畫，一步一步扎實地來", d: { s: -2 } },
+        { label: "最快的方法是直接動手做一次，身體自然會記住", d: { k: 2 } },
+        { label: "先在腦海裡模擬過幾次，確定清楚了才正式開始", d: { k: -2 } }
+      ]
+    },
+    {
+      text: "心情很滿、快要滿出來的時候，你比較想？",
+      options: [
+        { label: "找個地方大哭一場，或是把情緒整個發洩出來", d: { f: 3 } },
+        { label: "寫下來、想清楚之後再決定怎麼辦", d: { f: -3 } },
+        { label: "出去走走、跑步，讓身體動一動", d: { k: 3 } },
+        { label: "整理房間、摺衣服，做點讓自己平靜的小事", d: { s: -3 } }
+      ]
+    },
+    {
+      text: "放假的時候，你的身體比較想？",
+      options: [
+        { label: "到處走走、爬山、運動，讓身體好好動一動", d: { k: 3 } },
+        { label: "窩在家裡，安靜地看書或做細活", d: { k: -3 } },
+        { label: "做一些重複的日常事務，像整理、打掃", d: { k: 1, s: -3 } },
+        { label: "耍廢放空，想到什麼算什麼", d: { s: 2 } }
+      ]
+    },
+    {
+      text: "生活中不小心把事情搞砸了，你的反應是？",
+      options: [
+        { label: "沒關係，順勢調整就好，計畫趕不上變化很正常", d: { f: 2 } },
+        { label: "會想辦法補救、修正到滿意為止", d: { f: -2, s: -1 } },
+        { label: "那就這樣吧，過去的事不會回頭，往前看", d: { s: 3 } },
+        { label: "先動手做點什麼來補救，做了再說", d: { k: 2 } }
+      ]
+    },
+    {
+      text: "你心目中的「完美」，比較像？",
+      options: [
+        { label: "顏色自然流動、暈染開來的樣子", d: { f: 3 } },
+        { label: "每個細節都精準、乾淨俐落", d: { f: -3 } },
+        { label: "當下發生的就是完整的，不需要修改", d: { s: 3 } },
+        { label: "反覆調整、重新排列，直到剛剛好", d: { s: -2 } }
+      ]
+    },
+    {
+      text: "如果有一整天可以自由創作，你最想？",
+      options: [
+        { label: "把顏料弄得到處都是，盡情揮灑", d: { f: 3 } },
+        { label: "安靜地、精細地完成一幅畫", d: { f: -3 } },
+        { label: "順其自然，什麼也不做也沒關係", d: { s: 3 } },
+        { label: "做一些重複、療癒的手作，像編織或縫紉", d: { s: -3, k: 1 } }
+      ]
+    },
+    {
+      text: "比較喜歡哪種天氣帶來的感覺？",
+      options: [
+        { label: "起霧的早晨，景色都矇矇的，看不清楚邊界", d: { b: 3 } },
+        { label: "雨後放晴，空氣通透，每個輪廓都很清楚", d: { b: -3 } },
+        { label: "夕陽西下，光線柔和、顏色互相暈染", d: { b: 2 } },
+        { label: "大晴天的正中午，光線強烈、陰影分明", d: { b: -2 } }
+      ]
+    },
+    {
+      text: "說話或表達想法的時候，你比較像？",
+      options: [
+        { label: "常常點到為止，留一點空間讓人自己體會", d: { b: 3 } },
+        { label: "會講得很明確具體，不留模糊空間", d: { b: -3 } },
+        { label: "看對象，有時候含蓄有時候直接", d: { b: 1 } },
+        { label: "想清楚了才說，但說出來通常很篤定", d: { b: -2 } }
+      ]
+    },
+    {
+      text: "摸到什麼樣的材質，會讓你覺得舒服？",
+      options: [
+        { label: "蓬鬆柔軟、沒有明確形狀的東西，像棉花或絨毛", d: { b: 3 } },
+        { label: "邊緣分明、觸感乾淨俐落的東西，像光滑的石頭或金屬", d: { b: -3 } },
+        { label: "有點粗糙、帶著自然紋理的東西，像木頭或麻布", d: { b: 1 } },
+        { label: "冰涼平整、線條工整的東西，像玻璃或瓷器", d: { b: -2 } }
+      ]
+    }
+  ];
+
+  var answers = new Array(questions.length).fill(null);
+  var current = 0;
+  var TOTAL_STEPS = questions.length + 2;
+  var progressFill = document.getElementById('progressFill');
+
+  function buildQuestionScreens() {
+    questions.forEach(function (q, i) {
+      var screen = document.getElementById('q' + i);
+      var html = '';
+      html += '<p class="q-count">問題 ' + (i + 1) + ' / ' + questions.length + '</p>';
+      html += '<h2 class="q-text">' + q.text + '</h2>';
+      html += '<div class="options" role="group">';
+      q.options.forEach(function (opt, oi) {
+        html += '<button class="opt" type="button" data-q="' + i + '" data-oi="' + oi + '" aria-pressed="false">' + opt.label + '</button>';
+      });
+      html += '</div>';
+      html += '<div class="q-nav"><button class="q-back" type="button" data-back="' + i + '">← 上一題</button><span></span></div>';
+      screen.innerHTML = html;
+    });
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+  }
+
+  function updateProgress(stepIndex) {
+    var pct = Math.round((stepIndex / (TOTAL_STEPS - 1)) * 100);
+    progressFill.style.width = pct + '%';
+  }
+
+  function goToQuestion(i) {
+    current = i;
+    showScreen('q' + i);
+    updateProgress(i + 1);
+    var screen = document.getElementById('q' + i);
+    var selected = answers[i];
+    screen.querySelectorAll('.opt').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', selected !== null && Number(btn.dataset.oi) === selected ? 'true' : 'false');
+    });
+  }
+
+  function selectOption(qIndex, optIndex) {
+    answers[qIndex] = optIndex;
+    var screen = document.getElementById('q' + qIndex);
+    screen.querySelectorAll('.opt').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', Number(btn.dataset.oi) === optIndex ? 'true' : 'false');
+    });
+    window.setTimeout(function () {
+      if (qIndex < questions.length - 1) {
+        goToQuestion(qIndex + 1);
+      } else {
+        showResult();
+      }
+    }, 220);
+  }
+
+  // 依題目實際可能達到的分數範圍自動校正（而非假設對稱區間），
+  // 確保每個向度都能真正跑滿 0-10，媒材配對更準確。
+  var AXIS_RANGE = (function () {
+    var range = { f: { min: 0, max: 0 }, k: { min: 0, max: 0 }, s: { min: 0, max: 0 }, b: { min: 0, max: 0 } };
+    ['f', 'k', 's', 'b'].forEach(function (axis) {
+      var minSum = 0, maxSum = 0;
+      questions.forEach(function (q) {
+        var vals = q.options.map(function (opt) { return (opt.d && opt.d[axis]) || 0; });
+        minSum += Math.min.apply(null, vals);
+        maxSum += Math.max.apply(null, vals);
+      });
+      range[axis] = { min: minSum, max: maxSum };
+    });
+    return range;
+  })();
+
+  function computeScores() {
+    var raw = { f: 0, k: 0, s: 0, b: 0 };
+    answers.forEach(function (a, i) {
+      if (a === null) return;
+      var d = questions[i].options[a].d || {};
+      raw.f += d.f || 0;
+      raw.k += d.k || 0;
+      raw.s += d.s || 0;
+      raw.b += d.b || 0;
+    });
+    function norm(v, axis) {
+      var r = AXIS_RANGE[axis];
+      var span = r.max - r.min;
+      var scaled = span === 0 ? 5 : (v - r.min) / span * 10;
+      return Math.max(0, Math.min(10, scaled));
+    }
+    return { f: norm(raw.f, 'f'), k: norm(raw.k, 'k'), s: norm(raw.s, 's'), b: norm(raw.b, 'b') };
+  }
+
+  function nearestMedia(score) {
+    var ranked = media.map(function (m) {
+      var dist = Math.sqrt(
+        Math.pow(m.f - score.f, 2) +
+        Math.pow(m.k - score.k, 2) +
+        Math.pow(m.s - score.s, 2) +
+        Math.pow(m.b - score.b, 2)
+      );
+      return { m: m, dist: dist };
+    }).sort(function (a, b) { return a.dist - b.dist; });
+    return ranked;
+  }
+
+  function showResult() {
+    showScreen('result');
+    updateProgress(TOTAL_STEPS - 1);
+    var score = computeScores();
+    var ranked = nearestMedia(score);
+    var best = ranked[0].m;
+    var second = ranked[1].m;
+    var third = ranked[2].m;
+
+    document.getElementById('resultTitle').textContent = best.name;
+    document.getElementById('resultSub').textContent = "在 15 種媒材中，最接近你的是這一個";
+    document.getElementById('resultBody').innerHTML = '<p>' + best.desc + '</p>';
+
+    document.getElementById('fillF').style.width = Math.round(score.f / 10 * 100) + '%';
+    document.getElementById('fillK').style.width = Math.round(score.k / 10 * 100) + '%';
+    document.getElementById('fillS').style.width = Math.round(score.s / 10 * 100) + '%';
+    document.getElementById('fillB').style.width = Math.round(score.b / 10 * 100) + '%';
+
+    document.getElementById('secondTitle').textContent = second.name;
+    document.getElementById('secondBody').textContent = second.desc;
+    document.getElementById('thirdTitle').textContent = third.name;
+    document.getElementById('thirdBody').textContent = third.desc;
+
+    var gridEl = document.getElementById('mediaGrid');
+    gridEl.innerHTML = media.map(function (m) {
+      var isCurrent = m.name === best.name;
+      return '<div class="media-item' + (isCurrent ? ' is-current' : '') + '">' + m.name + (isCurrent ? '　← 你' : '') + '</div>';
+    }).join('');
+  }
+
+  buildQuestionScreens();
+
+  document.getElementById('startBtn').addEventListener('click', function () {
+    goToQuestion(0);
+  });
+
+  document.addEventListener('click', function (e) {
+    var opt = e.target.closest('.opt');
+    if (opt) {
+      selectOption(Number(opt.dataset.q), Number(opt.dataset.oi));
+      return;
+    }
+    var back = e.target.closest('[data-back]');
+    if (back) {
+      var i = Number(back.dataset.back);
+      if (i > 0) {
+        goToQuestion(i - 1);
+      } else {
+        showScreen('intro');
+        updateProgress(0);
+      }
+    }
+  });
+
+  document.getElementById('restartBtn').addEventListener('click', function () {
+    answers = new Array(questions.length).fill(null);
+    showScreen('intro');
+    updateProgress(0);
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', function () {
+    var score = computeScores();
+    var ranked = nearestMedia(score);
+    var best = ranked[0].m;
+    var text = "我在「測測你適合的藝術媒材」測驗得到：" + best.name
+      + "。森林開放畫室——不是來把畫畫好，只是一起帶著畫布走進森林。";
+    var noteEl = document.getElementById('copyNote');
+    function showCopied() {
+      noteEl.textContent = "已複製，可以貼到限動或聊天室分享給朋友";
+      window.setTimeout(function () { noteEl.textContent = ''; }, 3000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(showCopied).catch(function () {
+        noteEl.textContent = text;
+      });
+    } else {
+      noteEl.textContent = text;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
